@@ -5,6 +5,16 @@ RUN apt-get install -y php5-memcache php5-memcached
 
 RUN usermod -u 1000 www-data
 
+# Install composer
+RUN apt-get install -y curl
+RUN curl -s https://getcomposer.org/installer | php
+RUN mv composer.phar /usr/local/bin/composer
+RUN mkdir /var/composer
+RUN composer require symfony/var-dumper --working-dir=/var/composer
+RUN chown -R www-data:www-data /var/composer
+RUN echo "auto_prepend_file = /var/composer/vendor/autoload.php" >> /etc/php5/fpm/php.ini
+RUN echo "auto_prepend_file = /var/composer/vendor/autoload.php" >> /etc/php5/cli/php.ini
+
 CMD ["php5-fpm", "-F"]
 
 EXPOSE 9000
