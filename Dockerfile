@@ -23,7 +23,17 @@ RUN chown -R www-data:www-data /var/composer
 RUN echo "auto_prepend_file = /var/composer/vendor/autoload.php" >> /etc/php5/fpm/php.ini
 RUN echo "auto_prepend_file = /var/composer/vendor/autoload.php" >> /etc/php5/cli/php.ini
 
+ENV GIT_USERNAME 'c2is'
+ENV GIT_EMAIL 'g.manen@c2is.fr'
+
+# Install git
+RUN apt-get update && apt-get install -y git
+RUN git config --global user.name GIT_USERNAME
+RUN git config --global user.email GIT_EMAIL
+
 RUN chmod +x /opt/docker/entrypoint.sh && sh /opt/docker/entrypoint.sh
+
+VOLUME /var/www/.ssh
 
 CMD ["php5-fpm", "-F"]
 
