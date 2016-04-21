@@ -22,6 +22,9 @@ RUN chown -R www-data:www-data /var/composer
 RUN echo "auto_prepend_file = /var/composer/vendor/autoload.php" >> /etc/php5/fpm/php.ini
 RUN echo "auto_prepend_file = /var/composer/vendor/autoload.php" >> /etc/php5/cli/php.ini
 
+CMD mkdir /var/www/.composer
+CMD chown -R www-data:www-data /var/www/*
+
 CMD ["php5-fpm", "-F"]
 
 EXPOSE 9000
