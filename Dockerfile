@@ -9,6 +9,7 @@ ADD conf/symfony.ini /etc/php5/fpm/conf.d/
 ADD conf/symfony.ini /etc/php5/cli/conf.d/
 
 ADD conf/symfony.pool.conf /etc/php5/fpm/pool.d/
+ADD entrypoint.sh /opt/docker/entrypoint.sh
 
 RUN usermod -u 1000 www-data
 
@@ -22,8 +23,7 @@ RUN chown -R www-data:www-data /var/composer
 RUN echo "auto_prepend_file = /var/composer/vendor/autoload.php" >> /etc/php5/fpm/php.ini
 RUN echo "auto_prepend_file = /var/composer/vendor/autoload.php" >> /etc/php5/cli/php.ini
 
-CMD mkdir /var/www/.composer
-CMD chown -R www-data:www-data /var/www/*
+RUN chmod +x /opt/docker/entrypoint.sh && sh /opt/docker/entrypoint.sh
 
 CMD ["php5-fpm", "-F"]
 
