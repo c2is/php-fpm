@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM nachochip/ffmpeg
 
 RUN mkdir /entrypoint-initdb.d
 
