@@ -1,10 +1,39 @@
-FROM debian:jessie
+FROM debian:stretch
 
-RUN apt-get update && apt-get install -y php5-common php5-cli php5-fpm php5-mcrypt php5-mysql php5-apcu php5-gd php5-imagick php5-curl php5-intl php5-pgsql
-RUN apt-get install -y php5-memcache php5-memcached
+RUN mkdir /entrypoint-initdb.d
+
+RUN apt-get update && apt-get install -y git zip mysql-client php7.0-common php7.0-cli php7.0-fpm php7.0-mcrypt php7.0-mysql php7.0-apcu php7.0-gd php7.0-imagick php7.0-curl php7.0-intl php7.0-pgsql php7.0-mbstring php-pear php7.0-dev php7.0-xdebug
+
+RUN rm /etc/php/7.0/fpm/pool.d/*
+
+ADD symfony.ini /etc/php/7.0/fpm/conf.d/
+ADD symfony.ini /etc/php/7.0/cli/conf.d/
+ADD symfony.pool.conf /etc/php/7.0/fpm/pool.d/
 
 RUN usermod -u 1000 www-data
 
-CMD ["php5-fpm", "-F"]
+# Install composer
+RUN curl -s https://getcomposer.org/installer | php
+RUN mv composer.phar /usr/local/bin/composer
+RUN mkdir /var/composer
+RUN composer require symfony/var-dumper --working-dir=/var/composer
+RUN chown -R www-data:www-data /var/composer
+RUN echo "auto_prepend_file = /var/composer/vendor/autoload.php" >> /etc/php/7.0/fpm/php.ini
+RUN echo "auto_prepend_file = /var/composer/vendor/autoload.php" >> /etc/php/7.0/cli/php.ini
+
+ADD build.sh /opt/docker/
+RUN chmod +x /opt/docker/build.sh && sh /opt/docker/build.sh
+
+
+VOLUME /var/www/.ssh
+
+RUN service php7.0-fpm start
 
 EXPOSE 9000
+
+# Entrypoint
+COPY entrypoint.sh /usr/local/bin/
+RUN ln -s /usr/local/bin/entrypoint.sh /entrypoint.sh && chmod +x /entrypoint.sh
+ENTRYPOINT ["entrypoint.sh"]
+
+CMD ["php-fpm7.0", "-F"]
